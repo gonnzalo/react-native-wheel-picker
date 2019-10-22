@@ -6,16 +6,30 @@ import {
   Text,
   Dimensions,
   ScrollView,
+  Image,
+  TextInput,
 } from 'react-native';
 
 const {width} = Dimensions.get('window');
 const minWeigth = 1;
 const maxWeigth = 100;
-const biglegWidth = 2;
-const mediumSmallLegWidth = 1;
-const legSpacing = biglegWidth + mediumSmallLegWidth * 9;
-const spaceStart = Math.floor(width / 2);
+const biglegWidth = 3;
+const mediumSmallLegWidth = biglegWidth / 2;
+const legSpacing = 12;
+const legContainerWidth =
+  legSpacing * 10 + biglegWidth + mediumSmallLegWidth * 9;
+const spaceStart = Math.round(width / 2);
 const spaceEnd = spaceStart - legSpacing;
+
+const color = {
+  background: '#f3f3f5',
+  navegation: '#666',
+  dark: '#58585a',
+  darkMedium: '#9f9fa1',
+  darkLigth: '#d6d6d8',
+  primary: '##13a89e',
+  white: '#fff',
+};
 
 // make the weigth number data
 function makeData(minValue, maxValue) {
@@ -40,8 +54,8 @@ class Wheel extends Component {
         {data.map(i => {
           return (
             <View key={i} style={styles.legsContainer}>
-              <View style={styles.wheelnumbersContainer}>
-                <Text style={styles.Wheelnumbers}>{i}</Text>
+              <View style={styles.wheelNumbersContainer}>
+                <Text style={styles.wheelNumbers}>{i}</Text>
               </View>
               <View style={styles.bigLeg} />
               <View style={styles.smallLeg} />
@@ -70,9 +84,26 @@ class WheelPicker extends Component {
   render() {
     return (
       <View style={styles.WheelPickerContainer}>
-        <ScrollView horizontal>
-          <Wheel />
-        </ScrollView>
+        <View style={styles.textContainer}>
+          <TextInput
+            ref={element => (this.textInputRef = element)}
+            style={styles.text}
+            editable={false}
+            value={'100'}
+          />
+          <TextInput style={styles.textKg} editable={false}>
+            kg
+          </TextInput>
+        </View>
+        <View>
+          <ScrollView horizontal>
+            <Wheel />
+          </ScrollView>
+          <Image
+            source={require('./img/weight_arrow.png')}
+            style={styles.pointer}
+          />
+        </View>
       </View>
     );
   }
@@ -96,42 +127,45 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
   },
   legsContainer: {
-    width: legSpacing * 11,
+    width: legContainerWidth,
     flexDirection: 'row',
     alignItems: 'flex-end',
+    paddingTop: 28,
   },
-  wheelnumbersContainer: {
+  wheelNumbersContainer: {
     position: 'absolute',
-    top: -20,
-    left: -14,
-    width: 30,
+    top: 13,
+    left: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  wheelNumber: {
-    color: '#555',
+  wheelNumbers: {
+    position: 'absolute',
+    textAlign: 'center',
+    color: color.dark,
+    width: 40,
     fontSize: 20,
   },
   bigLeg: {
     width: biglegWidth,
-    backgroundColor: '#555',
+    backgroundColor: color.dark,
     height: 85,
     marginRight: legSpacing,
   },
   mediumLeg: {
     width: mediumSmallLegWidth,
-    backgroundColor: '#888',
+    backgroundColor: color.darkMedium,
     height: 70,
     marginRight: legSpacing,
   },
   smallLeg: {
     width: mediumSmallLegWidth,
-    backgroundColor: '#999',
+    backgroundColor: color.darkLigth,
     height: 55,
     marginRight: legSpacing,
   },
   startSpacing: {
-    width: spaceStart,
+    width: spaceStart - mediumSmallLegWidth,
   },
   endSpacing: {
     width: spaceEnd,
@@ -140,6 +174,25 @@ const styles = StyleSheet.create({
   WheelPickerContainer: {
     flex: 1,
     justifyContent: 'center',
+  },
+  textContainer: {
+    alignSelf: 'center',
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  text: {
+    fontSize: 65,
+    color: '#13a89e',
+  },
+  textKg: {
+    fontSize: 20,
+    height: 80,
+    color: '#13a89e',
+  },
+  pointer: {
+    position: 'absolute',
+    alignSelf: 'center',
+    top: 23,
   },
 
   container: {
