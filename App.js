@@ -8,6 +8,7 @@ import {
   ScrollView,
   Image,
   TextInput,
+  Animated,
 } from 'react-native';
 
 const {width} = Dimensions.get('window');
@@ -15,7 +16,7 @@ const minWeigth = 1;
 const maxWeigth = 100;
 const biglegWidth = 3;
 const mediumSmallLegWidth = biglegWidth / 2;
-const legSpacing = 12;
+const legSpacing = 11;
 const legContainerWidth =
   legSpacing * 10 + biglegWidth + mediumSmallLegWidth * 9;
 const spaceStart = Math.round(width / 2);
@@ -79,6 +80,44 @@ class Wheel extends Component {
 class WheelPicker extends Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      scrollX: new Animated.Value(0),
+      newValue: 60,
+    };
+  }
+
+  componentDidMount() {
+    this.state.scrollX.addListener(({value}) => {
+      if (this.textInputRef) {
+        let changeValue = (
+          Math.round(value / (legContainerWidth / 10)) / 10 +
+          minWeigth
+        ).toFixed(1);
+        this.textInputRef.setNativeProps({
+          text: changeValue,
+        });
+        this.textInputRef.value = changeValue;
+      }
+    });
+
+    setTimeout(() => {
+      if (this.scrollViewRef) {
+        console.log(this.props.currentValue);
+        this.scrollViewRef.getNode().scrollTo({
+          x: Math.round(
+            (legContainerWidth / 10) *
+              (this.state.newValue * 10 - minWeigth * 10),
+          ),
+          y: 0,
+          animated: true,
+        });
+      }
+    }, 1);
+  }
+
+  componentWillUnmount() {
+    this.state.scrollX.removeAllListeners;
   }
 
   render() {
@@ -89,16 +128,29 @@ class WheelPicker extends Component {
             ref={element => (this.textInputRef = element)}
             style={styles.text}
             editable={false}
-            value={'100'}
           />
           <TextInput style={styles.textKg} editable={false}>
             kg
           </TextInput>
         </View>
         <View>
-          <ScrollView horizontal>
+          <Animated.ScrollView
+            ref={element => (this.scrollViewRef = element)}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            scrollEventThrottle={16}
+            onScroll={Animated.event(
+              [
+                {
+                  nativeEvent: {
+                    contentOffset: {x: this.state.scrollX},
+                  },
+                },
+              ],
+              {useNativeDriver: true},
+            )}>
             <Wheel />
-          </ScrollView>
+          </Animated.ScrollView>
           <Image
             source={require('./img/weight_arrow.png')}
             style={styles.pointer}
