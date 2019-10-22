@@ -9,6 +9,8 @@ import {
   TextInput,
   Animated,
   TouchableOpacity,
+  TouchableHighlight,
+  Modal,
 } from 'react-native';
 
 // wheel data
@@ -31,6 +33,7 @@ const color = {
   darkLigth: '#d6d6d8',
   primary: '#13a89e',
   white: '#fff',
+  secundaryDark: '#555',
 };
 
 // make the wheel number data
@@ -78,10 +81,13 @@ class Wheel extends Component {
   }
 }
 
-const NavegationBar = props => {
+const NavigationBar = props => {
   return (
-    <View style={styles.navegationContainer}>
-      <TouchableOpacity>
+    <View style={styles.navigationContainer}>
+      <TouchableOpacity
+        onPress={() => {
+          props.handleSave(false);
+        }}>
         <View>
           <Text style={styles.headerBack}> &lt;</Text>
         </View>
@@ -89,7 +95,7 @@ const NavegationBar = props => {
       <View>
         <Text style={styles.header}>WEIGTH</Text>
       </View>
-      <TouchableOpacity>
+      <TouchableOpacity onPress={() => props.handleSave(true)}>
         <View>
           <Text style={styles.headerSave}>Save</Text>
         </View>
@@ -106,6 +112,8 @@ class WheelPicker extends Component {
       scrollX: new Animated.Value(0),
       newValue: 60,
     };
+
+    this.handleSave = this.handleSave.bind(this);
   }
 
   componentDidMount() {
@@ -129,7 +137,9 @@ class WheelPicker extends Component {
         this.scrollViewRef.getNode().scrollTo({
           x: Math.round(
             (legContainerWidth / 10) *
-              (this.state.newValue * 10 - minWeigth * 10),
+              ((isNaN(this.props.currentValue) ? 60 : this.props.currentValue) *
+                10 -
+                minWeigth * 10),
           ),
           y: 0,
           animated: true,
@@ -142,10 +152,18 @@ class WheelPicker extends Component {
     this.state.scrollX.removeAllListeners;
   }
 
+  handleSave(val) {
+    if (val) this.props.setCurrentWeigth(this.textInputRef.value);
+    this.props.setModalVisible(false);
+  }
+
   render() {
     return (
       <View style={styles.WheelPickerContainer}>
-        <NavegationBar />
+        <NavigationBar
+          setModalVisible={this.props.setModalVisible}
+          handleSave={this.handleSave}
+        />
         <View style={styles.textContainer}>
           <TextInput
             ref={element => (this.textInputRef = element)}
@@ -184,15 +202,60 @@ class WheelPicker extends Component {
   }
 }
 
-const App = () => {
-  return (
-    <>
-      <SafeAreaView style={styles.container}>
-        <WheelPicker />
-      </SafeAreaView>
-    </>
-  );
-};
+class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      currentWeigt: 'Select',
+      modalVisible: false,
+    };
+    this.setModalVisible = this.setModalVisible.bind(this);
+    this.setCurrentWeigth = this.setCurrentWeigth.bind(this);
+  }
+
+  setModalVisible(visible) {
+    this.setState({modalVisible: visible});
+  }
+
+  setCurrentWeigth(weigth) {
+    this.setState({currentWeigt: weigth});
+  }
+
+  render() {
+    return (
+      <>
+        <SafeAreaView style={styles.appContainer}>
+          <Modal
+            animationType="slide"
+            transparent={false}
+            visible={this.state.modalVisible}>
+            <View style={styles.container}>
+              <WheelPicker
+                setModalVisible={this.setModalVisible}
+                setCurrentWeigth={this.setCurrentWeigth}
+                currentValue={this.state.currentWeigt}
+              />
+            </View>
+          </Modal>
+
+          <TouchableHighlight
+            onPress={() => {
+              this.setModalVisible(true);
+            }}>
+            <View style={styles.selectContainer}>
+              <Text style={styles.textSelect}>Weigth</Text>
+              <Text style={styles.textSelectWeight}>
+                {this.state.currentWeigt}{' '}
+                {!isNaN(this.state.currentWeigt) && 'Kg'} &gt;
+              </Text>
+            </View>
+          </TouchableHighlight>
+        </SafeAreaView>
+      </>
+    );
+  }
+}
 
 const styles = StyleSheet.create({
   // Wheel style
@@ -270,8 +333,8 @@ const styles = StyleSheet.create({
     top: 23,
   },
 
-  // NavegationBar Style
-  navegationContainer: {
+  // NavigationBar Style
+  navigationContainer: {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -297,8 +360,35 @@ const styles = StyleSheet.create({
     color: color.white,
   },
 
+  // App Style
+  appContainer: {
+    flex: 1,
+    justifyContent: 'center',
+  },
   container: {
     flex: 1,
+  },
+  selectContainer: {
+    marginLeft: 30,
+    marginRight: 30,
+    paddingTop: 20,
+    paddingBottom: 20,
+    borderTopColor: color.darkLigth,
+    borderTopWidth: 1,
+    borderBottomColor: color.darkLigth,
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    fontSize: 30,
+  },
+  textSelect: {
+    fontSize: 20,
+    color: color.dark,
+  },
+  textSelectWeight: {
+    fontSize: 16,
+    color: color.secundaryDark,
   },
 });
 
