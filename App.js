@@ -5,12 +5,13 @@ import {
   View,
   Text,
   Dimensions,
-  ScrollView,
   Image,
   TextInput,
   Animated,
+  TouchableOpacity,
 } from 'react-native';
 
+// wheel data
 const {width} = Dimensions.get('window');
 const minWeigth = 1;
 const maxWeigth = 100;
@@ -28,11 +29,11 @@ const color = {
   dark: '#58585a',
   darkMedium: '#9f9fa1',
   darkLigth: '#d6d6d8',
-  primary: '##13a89e',
+  primary: '#13a89e',
   white: '#fff',
 };
 
-// make the weigth number data
+// make the wheel number data
 function makeData(minValue, maxValue) {
   let arrayData = [];
   for (let i = minValue; i <= maxValue; i++) {
@@ -77,6 +78,26 @@ class Wheel extends Component {
   }
 }
 
+const NavegationBar = props => {
+  return (
+    <View style={styles.navegationContainer}>
+      <TouchableOpacity>
+        <View>
+          <Text style={styles.headerBack}> &lt;</Text>
+        </View>
+      </TouchableOpacity>
+      <View>
+        <Text style={styles.header}>WEIGTH</Text>
+      </View>
+      <TouchableOpacity>
+        <View>
+          <Text style={styles.headerSave}>Save</Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+  );
+};
+
 class WheelPicker extends Component {
   constructor(props) {
     super(props);
@@ -88,6 +109,7 @@ class WheelPicker extends Component {
   }
 
   componentDidMount() {
+    // scroll event
     this.state.scrollX.addListener(({value}) => {
       if (this.textInputRef) {
         let changeValue = (
@@ -101,9 +123,9 @@ class WheelPicker extends Component {
       }
     });
 
+    // scroll to starting point (default or current)
     setTimeout(() => {
       if (this.scrollViewRef) {
-        console.log(this.props.currentValue);
         this.scrollViewRef.getNode().scrollTo({
           x: Math.round(
             (legContainerWidth / 10) *
@@ -123,6 +145,7 @@ class WheelPicker extends Component {
   render() {
     return (
       <View style={styles.WheelPickerContainer}>
+        <NavegationBar />
         <View style={styles.textContainer}>
           <TextInput
             ref={element => (this.textInputRef = element)}
@@ -234,17 +257,44 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 65,
-    color: '#13a89e',
+    color: color.primary,
   },
   textKg: {
     fontSize: 20,
     height: 80,
-    color: '#13a89e',
+    color: color.primary,
   },
   pointer: {
     position: 'absolute',
     alignSelf: 'center',
     top: 23,
+  },
+
+  // NavegationBar Style
+  navegationContainer: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    height: 50,
+    backgroundColor: color.navegation,
+    paddingLeft: 20,
+    paddingRight: 20,
+  },
+  header: {
+    fontSize: 20,
+    color: color.white,
+  },
+  headerBack: {
+    fontSize: 23,
+    color: color.white,
+  },
+  headerSave: {
+    fontSize: 20,
+    color: color.white,
   },
 
   container: {
