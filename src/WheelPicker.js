@@ -13,11 +13,11 @@ import color from './color';
 
 // wheel data
 const {width} = Dimensions.get('window');
-const minWeigth = 1;
+const minWeigth = 30;
 const maxWeigth = 100;
 const biglegWidth = 3;
 const mediumSmallLegWidth = biglegWidth / 2;
-const legSpacing = 11;
+const legSpacing = 7;
 const legContainerWidth =
   legSpacing * 10 + biglegWidth + mediumSmallLegWidth * 9;
 const spaceStart = Math.round(width / 2);
@@ -34,11 +34,13 @@ function makeData(minValue, maxValue) {
 
 const data = makeData(minWeigth, maxWeigth);
 
+// Make the wheel with ref in legs
 class Wheel extends Component {
   constructor(props) {
     super(props);
-  }
 
+    this.legRef = [];
+  }
   render() {
     return (
       <View style={styles.wheelContainer}>
@@ -49,16 +51,46 @@ class Wheel extends Component {
               <View style={styles.wheelNumbersContainer}>
                 <Text style={styles.wheelNumbers}>{i}</Text>
               </View>
-              <View style={styles.bigLeg} />
-              <View style={styles.smallLeg} />
-              <View style={styles.smallLeg} />
-              <View style={styles.smallLeg} />
-              <View style={styles.smallLeg} />
-              <View style={styles.mediumLeg} />
-              <View style={styles.smallLeg} />
-              <View style={styles.smallLeg} />
-              <View style={styles.smallLeg} />
-              <View style={styles.smallLeg} />
+              <View
+                style={styles.bigLeg}
+                ref={element => (this.legRef[i.toFixed(1)] = element)}
+              />
+              <View
+                style={styles.smallLeg}
+                ref={element => (this.legRef[i + 0.1] = element)}
+              />
+              <View
+                style={styles.smallLeg}
+                ref={element => (this.legRef[i + 0.2] = element)}
+              />
+              <View
+                style={styles.smallLeg}
+                ref={element => (this.legRef[i + 0.3] = element)}
+              />
+              <View
+                style={styles.smallLeg}
+                ref={element => (this.legRef[i + 0.4] = element)}
+              />
+              <View
+                style={styles.mediumLeg}
+                ref={element => (this.legRef[i + 0.5] = element)}
+              />
+              <View
+                style={styles.smallLeg}
+                ref={element => (this.legRef[i + 0.6] = element)}
+              />
+              <View
+                style={styles.smallLeg}
+                ref={element => (this.legRef[i + 0.7] = element)}
+              />
+              <View
+                style={styles.smallLeg}
+                ref={element => (this.legRef[i + 0.8] = element)}
+              />
+              <View
+                style={styles.smallLeg}
+                ref={element => (this.legRef[i + 0.9] = element)}
+              />
             </View>
           );
         })}
@@ -106,15 +138,18 @@ class WheelPicker extends Component {
   componentDidMount() {
     // scroll event
     this.state.scrollX.addListener(({value}) => {
+      let changeValue = (
+        Math.round(value / (legContainerWidth / 10)) / 10 +
+        minWeigth
+      ).toFixed(1);
       if (this.textInputRef) {
-        let changeValue = (
-          Math.round(value / (legContainerWidth / 10)) / 10 +
-          minWeigth
-        ).toFixed(1);
         this.textInputRef.setNativeProps({
           text: changeValue,
         });
         this.textInputRef.value = changeValue;
+      }
+      if (this.wheelRef) {
+        this.makeCircle(changeValue);
       }
     });
 
@@ -142,6 +177,30 @@ class WheelPicker extends Component {
   handleSave(val) {
     if (val) this.props.setCurrentWeigth(this.textInputRef.value);
     this.props.setModalVisible(false);
+  }
+
+  // Make the semicirle shape using the leg ref... ? toDo: edges
+  makeCircle(val) {
+    let tempMargin = 0;
+    for (let i = -300; i <= 300; i += 10) {
+      if (Number(val) > minWeigth + 2.9 && Number(val) < maxWeigth - 2) {
+        if (i <= -200) tempMargin = tempMargin + 2.8;
+        if (i >= -200 && i < -150) tempMargin = tempMargin + 2.5;
+        if (i >= -150 && i < -100) tempMargin = tempMargin + 2;
+        if (i >= -100 && i < -50) tempMargin = tempMargin + 1.5;
+        if (i >= -50 && i < -10) tempMargin = tempMargin + 0.5;
+        if (i > 20 && i <= 60) tempMargin = tempMargin - 0.5;
+        if (i > 60 && i <= 110) tempMargin = tempMargin - 1.5;
+        if (i > 110 && i <= 160) tempMargin = tempMargin - 2;
+        if (i > 160 && i <= 210) tempMargin = tempMargin - 2.5;
+        if (i >= 210) tempMargin = tempMargin - 2.8;
+        this.wheelRef.legRef[(Number(val) + i / 100).toFixed(1)].setNativeProps(
+          {
+            marginBottom: tempMargin,
+          },
+        );
+      }
+    }
   }
 
   render() {
@@ -176,7 +235,7 @@ class WheelPicker extends Component {
               ],
               {useNativeDriver: true},
             )}>
-            <Wheel />
+            <Wheel ref={element => (this.wheelRef = element)} />
           </Animated.ScrollView>
           <Image
             source={require('./img/weight_arrow.png')}
@@ -194,6 +253,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'flex-start',
     flexDirection: 'row',
+    height: 180,
   },
   legsContainer: {
     width: legContainerWidth,
@@ -247,21 +307,23 @@ const styles = StyleSheet.create({
   textContainer: {
     alignSelf: 'center',
     flexDirection: 'row',
-    alignItems: 'baseline',
   },
   text: {
     fontSize: 65,
+    padding: 0,
+    margin: 0,
     color: color.primary,
   },
   textKg: {
     fontSize: 20,
-    height: 80,
+    height: 85,
+    textAlignVertical: 'bottom',
     color: color.primary,
   },
   pointer: {
     position: 'absolute',
     alignSelf: 'center',
-    top: 23,
+    top: 30,
   },
 
   // NavigationBar Style
