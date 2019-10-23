@@ -13,8 +13,8 @@ import color from './color';
 
 // wheel data
 const {width} = Dimensions.get('window');
-const minWeigth = 30;
-const maxWeigth = 100;
+const minWeigth = 1;
+const maxWeigth = 200;
 const biglegWidth = 3;
 const mediumSmallLegWidth = biglegWidth / 2;
 const legSpacing = 7;
