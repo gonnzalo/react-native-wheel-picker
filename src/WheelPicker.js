@@ -1,38 +1,20 @@
 import React, {Component} from 'react';
+import {StyleSheet, View, Text, Image, TextInput, Animated} from 'react-native';
 import {
-  StyleSheet,
-  View,
-  Text,
-  Dimensions,
-  Image,
-  TextInput,
-  Animated,
-  TouchableOpacity,
-} from 'react-native';
+  minWeigth,
+  maxWeigth,
+  biglegWidth,
+  mediumSmallLegWidth,
+  legSpacing,
+  legContainerWidth,
+  spaceStart,
+  spaceEnd,
+  data,
+  changeValue,
+  scrollToCurrentValue,
+} from './utils';
 import color from './color';
-
-// wheel data
-const {width} = Dimensions.get('window');
-const minWeigth = 1;
-const maxWeigth = 200;
-const biglegWidth = 3;
-const mediumSmallLegWidth = biglegWidth / 2;
-const legSpacing = 7;
-const legContainerWidth =
-  legSpacing * 10 + biglegWidth + mediumSmallLegWidth * 9;
-const spaceStart = Math.round(width / 2);
-const spaceEnd = spaceStart - legSpacing;
-
-// make the wheel number data
-function makeData(minValue, maxValue) {
-  let arrayData = [];
-  for (let i = minValue; i <= maxValue; i++) {
-    arrayData.push(i);
-  }
-  return arrayData;
-}
-
-const data = makeData(minWeigth, maxWeigth);
+import NavigationBar from './NavigationBar';
 
 // Make the wheel with ref in legs
 class Wheel extends Component {
@@ -100,33 +82,9 @@ class Wheel extends Component {
   }
 }
 
-const NavigationBar = props => {
-  return (
-    <View style={styles.navigationContainer}>
-      <TouchableOpacity
-        onPress={() => {
-          props.handleSave(false);
-        }}>
-        <View>
-          <Text style={styles.headerBack}> &lt;</Text>
-        </View>
-      </TouchableOpacity>
-      <View>
-        <Text style={styles.header}>WEIGTH</Text>
-      </View>
-      <TouchableOpacity onPress={() => props.handleSave(true)}>
-        <View>
-          <Text style={styles.headerSave}>Save</Text>
-        </View>
-      </TouchableOpacity>
-    </View>
-  );
-};
-
 class WheelPicker extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
       scrollX: new Animated.Value(0),
       newValue: 60,
@@ -138,18 +96,15 @@ class WheelPicker extends Component {
   componentDidMount() {
     // scroll event
     this.state.scrollX.addListener(({value}) => {
-      let changeValue = (
-        Math.round(value / (legContainerWidth / 10)) / 10 +
-        minWeigth
-      ).toFixed(1);
+      let newValue = changeValue(value);
       if (this.textInputRef) {
         this.textInputRef.setNativeProps({
-          text: changeValue,
+          text: newValue,
         });
-        this.textInputRef.value = changeValue;
+        this.textInputRef.value = newValue;
       }
       if (this.wheelRef) {
-        this.makeCircle(changeValue);
+        this.makeCircle(newValue);
       }
     });
 
@@ -157,12 +112,7 @@ class WheelPicker extends Component {
     setTimeout(() => {
       if (this.scrollViewRef) {
         this.scrollViewRef.getNode().scrollTo({
-          x: Math.round(
-            (legContainerWidth / 10) *
-              ((isNaN(this.props.currentValue) ? 60 : this.props.currentValue) *
-                10 -
-                minWeigth * 10),
-          ),
+          x: scrollToCurrentValue(this.props.currentValue),
           y: 0,
           animated: true,
         });
@@ -172,11 +122,6 @@ class WheelPicker extends Component {
 
   componentWillUnmount() {
     this.state.scrollX.removeAllListeners;
-  }
-
-  handleSave(val) {
-    if (val) this.props.setCurrentWeigth(this.textInputRef.value);
-    this.props.setModalVisible(false);
   }
 
   // Make the semicirle shape using the leg ref... ? toDo: edges
@@ -201,6 +146,11 @@ class WheelPicker extends Component {
         );
       }
     }
+  }
+
+  handleSave(val) {
+    if (val) this.props.setCurrentWeigth(this.textInputRef.value);
+    this.props.setModalVisible(false);
   }
 
   render() {
@@ -324,33 +274,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     alignSelf: 'center',
     top: 30,
-  },
-
-  // NavigationBar Style
-  navigationContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    height: 50,
-    backgroundColor: color.navegation,
-    paddingLeft: 20,
-    paddingRight: 20,
-  },
-  header: {
-    fontSize: 20,
-    color: color.white,
-  },
-  headerBack: {
-    fontSize: 23,
-    color: color.white,
-  },
-  headerSave: {
-    fontSize: 20,
-    color: color.white,
   },
 });
 
