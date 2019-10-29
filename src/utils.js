@@ -28,10 +28,10 @@ const changeValue = val => {
   );
 };
 
-// when open modal scroll to current value.
+// when open modal scroll to current value. default value: 60
 const scrollToCurrentValue = val => {
   return Math.round(
-    (legContainerWidth / 10) * (isNaN(val) ? 60 : val) * 10 - minWeigth * 10,
+    (legContainerWidth / 10) * ((isNaN(val) ? 60 : val) * 10 - minWeigth * 10),
   );
 };
 
